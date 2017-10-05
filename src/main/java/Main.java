@@ -27,6 +27,9 @@ public class Main {
   viewBlocks = false, verboseCompile = false;
   private static String OS;
 
+  public static final String ANSI_YELLOW = "\u001B[33m";
+  public static final String ANSI_RED = "\u001B[31m";
+  public static final String ANSI_RESET = "\u001B[0m";
 
   public static void main(String arg[]) {
     OS = System.getProperty("os.name");
@@ -139,8 +142,16 @@ public class Main {
     }
 
     baseFileName = sourceFileName;
+
+    // stripping away .pas
     if (baseFileName.length()>4 && baseFileName.endsWith(".pas")) {
       baseFileName = baseFileName.substring(0,baseFileName.length()-4);
+    }
+
+    // stripping away potential folder path of baseFileName, leaving raw file
+    while (baseFileName.indexOf("/") != -1) {
+      baseFileName = baseFileName.substring(baseFileName.indexOf("/") + 1);
+      System.out.print("new baseFileName is " + baseFileName);
     }
   }
 
@@ -211,6 +222,12 @@ public class Main {
     String pName = baseFileName;
     String sName = baseFileName + ".s";
 
+    File binaries = new File("binaries");
+    if (binaries.exists() && binaries.isDirectory()) {
+      pName = "binaries/" + pName;
+      sName = "binaries/" + sName;
+    }
+
     String cmd[] = new String[7];
     cmd[0] = "gcc";  cmd[1] = "-m32";
     cmd[2] = "-o";   cmd[3] = pName;
@@ -245,6 +262,8 @@ public class Main {
       }
       out.close();  err.close();
       p.waitFor();
+      File sFile = new File(sName);
+      sFile.delete();
     } catch (Exception err) {
       error("Assembly errors detected.");
     }
@@ -293,6 +312,7 @@ public class Main {
 
   public static void error(String message) {
     log.noteError(message);
+    System.out.print(ANSI_RED + "ERROR: " + ANSI_RESET + message);
     throw new PascalError(message);
   }
 
@@ -313,6 +333,6 @@ public class Main {
 
   public static void warning(String message) {
     log.noteError(message);
-    System.err.println(message);
+    System.err.println(ANSI_YELLOW + "WARNING: " + ANSI_RESET + message);
   }
 }

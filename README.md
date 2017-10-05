@@ -16,4 +16,4 @@ After building, the runnable `.jar` is found at `build/libs/pascal2016.jar`.
 ```
 java -jar pascal2016.jar program.pas
 ```
-An example run would be `java -jar build/libs/pascal2016.jar programs/10star.pas`. Some test programs are located in the folder `programs`.
+An example run would be `java -jar build/libs/pascal2016.jar programs/10star.pas`. Some test programs are located in the folder `programs`. Binaries are placed in the folder `binaries`. If a file with that name exists, the binaries are placed from wherever the compiler was started.

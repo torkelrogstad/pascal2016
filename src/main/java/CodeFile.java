@@ -11,11 +11,26 @@ public class CodeFile {
   boolean verbose = false;
 
   CodeFile(String fName) {
+    File binariesDir = new File("binaries");
+    if (!binariesDir.exists()) {
+      System.out.print("creating directory for binary file: " + binariesDir.getName() + "... ");
+      try {
+        binariesDir.mkdir();
+      } catch(SecurityException se) {
+        Main.warning("Couldn't create directory. Falling back to default location.");
+      }
+    }
+
     codeFileName = fName;
+
+    if (binariesDir.exists() && binariesDir.isDirectory()) {
+      codeFileName = "binaries/" + fName;
+    }
+
     try {
-      code = new PrintWriter(new FileOutputStream(fName), true);
+      code = new PrintWriter(new FileOutputStream(codeFileName), true);
     } catch (FileNotFoundException e) {
-      Main.error("Cannot create code file " + fName + "!");
+      Main.error("Cannot create code file " + codeFileName + "!");
     }
     code.println("# Code file created by Pascal2016 compiler " +
     new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
