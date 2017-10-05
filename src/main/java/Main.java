@@ -211,11 +211,12 @@ public class Main {
     String pName = baseFileName;
     String sName = baseFileName + ".s";
 
-    String cmd[] = new String[8];
+    String cmd[] = new String[7];
     cmd[0] = "gcc";  cmd[1] = "-m32";
     cmd[2] = "-o";   cmd[3] = pName;
     cmd[4] = sName;
-    cmd[5] = "-L.";  cmd[6] = "-L/hom/inf2100";  cmd[7] = "-lpas2016";
+    cmd[5] = "-L.";  cmd[6] = "-l:build/libs/pas/static/libpas2016.a";
+
 
     System.out.print("Running");
     for (String s: cmd) {

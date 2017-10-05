@@ -28,12 +28,26 @@ jar {
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
 }
 
-// In this section you declare where to find the dependencies of your project
-repositories {
-    jcenter()
+// libpas.c
+apply plugin: "c"
+model {
+  platforms {
+    x86 {
+      architecture "x86"
+    }
+  }
+  components {
+    operators(NativeLibrarySpec) {
+      targetPlatform "x86"
+    }
+    pas(NativeLibrarySpec)
+  }
 }
 
-// In this section you declare the dependencies for your production and test code
+repositories {
+
+}
+
 dependencies {
 
 }
