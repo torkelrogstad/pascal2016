@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<project name="pascal2016" default="jar">
+
+  <target name="clean" description="Remove generated files">
+    <delete dir="classes"/>
+    <delete file="pascal2016.jar"/>
+    <delete>
+      <fileset defaultexcludes="no" dir="." includes="**/*~"/>
+    </delete>
+  </target>
+
+  <target name="compile" description="Compile pascal2016">
+    <mkdir dir="classes"/>
+    <javac srcdir="." destdir="classes" debug="true"
+	   debuglevel="lines,vars,source" includeantruntime="false"/>
+  </target>
+
+  <target name="jar" depends="compile" description="Make JAR-file">
+    <jar destfile="pascal2016.jar">
+      <fileset dir="classes" includes="**/*.class"/>
+      <fileset dir="src/pas/c" includes="pas2016.c"/>
+      <fileset dir="lib" includes="*.a"/>
+      <manifest>
+	<attribute name="Main-Class" value="main.Main"/>
+      </manifest>
+    </jar>
+  </target>
+</project>

@@ -5,9 +5,8 @@ import scanner.Scanner;
 import static scanner.TokenKind.*;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Collections;
+import java.util.*;
+import java.util.jar.*;
 
 import java.io.*;
 
@@ -217,56 +216,112 @@ public class Main {
     assembleCode();
   }
 
+  private static File genLibFile(String libname) throws IOException {
+    String jarfile = "pascal2016.jar";
+    InputStream input;
+    try {
+      JarFile jar = new JarFile(jarfile);
+      // for (Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
+      //   System.out.println(e.nextElement().getName());
+      // }
+      JarEntry entry = jar.getJarEntry(libname);
+      input = jar.getInputStream(entry);
+    } catch (IOException e) {
+      error("IO-error when handling " + jarfile);
+      return null; // won't be reached
+    }
+
+    byte[] buffer = new byte[input.available()];
+    input.read(buffer);
+
+    File ret = new File(libname);
+    new FileOutputStream(ret).write(buffer);
+    return ret;
+  }
 
   private static void assembleCode() {
-    String pName = baseFileName;
-    String sName = baseFileName + ".s";
+    String binaryFile = baseFileName;
+    String codeFile = baseFileName + ".s";
 
     File binaries = new File("binaries");
     if (binaries.exists() && binaries.isDirectory()) {
-      pName = "binaries/" + pName;
-      sName = "binaries/" + sName;
+      binaryFile = "binaries/" + binaryFile;
+      codeFile = "binaries/" + codeFile;
     }
 
-    String cmd[] = new String[7];
-    cmd[0] = "gcc";  cmd[1] = "-m32";
-    cmd[2] = "-o";   cmd[3] = pName;
-    cmd[4] = sName;
-    cmd[5] = "-L.";  cmd[6] = "-l:build/libs/pas/static/libpas2016.a";
-
-
-    System.out.print("Running");
-    for (String s: cmd) {
-      if (s.contains(" "))
-      System.out.print(" '" + s + "'");
-      else
-      System.out.print(" " + s);
+    File libfile = null;
+    String libname = "libpas2016.a";
+    try {
+      libfile = genLibFile(libname);
+    } catch (IOException e) {
+      error("IO-error when handling " + libname);
     }
-    System.out.println();
 
+    String command = "gcc -m32 -o " + binaryFile + " " + codeFile + " -L. -l:" + libname;
+
+
+
+    Process p;
     try {
       String line;
-      Process p = Runtime.getRuntime().exec(cmd);
-
-      // Print any output from the assembly process:
-      BufferedReader out = new BufferedReader
-      (new InputStreamReader(p.getInputStream()));
-      BufferedReader err = new BufferedReader
-      (new InputStreamReader(p.getErrorStream()));
+      p = Runtime.getRuntime().exec(command);
+      p.waitFor();
+      BufferedReader out = new BufferedReader(new InputStreamReader(p.getInputStream()));
+      BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
       while ((line = out.readLine()) != null) {
         System.out.println(line);
       }
+
       while ((line = err.readLine()) != null) {
-        System.out.println(line);
+        System.err.println(line);
       }
-      out.close();  err.close();
-      p.waitFor();
-      File sFile = new File(sName);
-      sFile.delete();
-    } catch (Exception err) {
+
+      out.close(); err.close();
+      new File(codeFile).delete(); // removing assembly-file
+      libfile.delete(); // removing libfile from current dir;
+    } catch (Exception e) {
       error("Assembly errors detected.");
     }
+    // String cmd[] = new String[7];
+    // cmd[0] = "gcc";  cmd[1] = "-m32";
+    // cmd[2] = "-o";   cmd[3] = binaryFile;
+    // cmd[4] = codeFile;
+    // cmd[5] = "-L.";  cmd[6] = "-l:libpas2016.a";
+
+
+    // System.out.print("Running");
+    // for (String s: cmd) {
+    //   if (s.contains(" "))
+    //   System.out.print(" '" + s + "'");
+    //   else
+    //   System.out.print(" " + s);
+    // }
+    // System.out.println();
+    //
+    // try {
+    //   String line;
+    //   Process p = Runtime.getRuntime().exec(cmd);
+    //
+    //   // Print any output from the assembly process:
+    //   BufferedReader out = new BufferedReader
+    //   (new InputStreamReader(p.getInputStream()));
+    //   BufferedReader err = new BufferedReader
+    //   (new InputStreamReader(p.getErrorStream()));
+    //
+    //   while ((line = out.readLine()) != null) {
+    //     System.out.println(line);
+    //   }
+    //   while ((line = err.readLine()) != null) {
+    //     System.out.println(line);
+    //   }
+    //   out.close();  err.close();
+    //   p.waitFor();
+    //   File sFile = new File(codeFile);
+    //   sFile.delete();
+    // } catch (Exception err) {
+    //   error("Assembly errors detected.");
+    // }
   }
 
   //development logging
