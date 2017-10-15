@@ -150,7 +150,6 @@ public class Main {
     // stripping away potential folder path of baseFileName, leaving raw file
     while (baseFileName.indexOf("/") != -1) {
       baseFileName = baseFileName.substring(baseFileName.indexOf("/") + 1);
-      System.out.print("new baseFileName is " + baseFileName);
     }
   }
 
@@ -217,13 +216,17 @@ public class Main {
   }
 
   private static File genLibFile(String libname) throws IOException {
-    String jarfile = "pascal2016.jar";
+    String jarfile = null;
+
+    try {
+      jarfile = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+    } catch (Exception e) {
+      error("IO-error when getting path of current .jar file!");
+    }
+    
     InputStream input;
     try {
       JarFile jar = new JarFile(jarfile);
-      // for (Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
-      //   System.out.println(e.nextElement().getName());
-      // }
       JarEntry entry = jar.getJarEntry(libname);
       input = jar.getInputStream(entry);
     } catch (IOException e) {
@@ -283,45 +286,6 @@ public class Main {
     } catch (Exception e) {
       error("Assembly errors detected.");
     }
-    // String cmd[] = new String[7];
-    // cmd[0] = "gcc";  cmd[1] = "-m32";
-    // cmd[2] = "-o";   cmd[3] = binaryFile;
-    // cmd[4] = codeFile;
-    // cmd[5] = "-L.";  cmd[6] = "-l:libpas2016.a";
-
-
-    // System.out.print("Running");
-    // for (String s: cmd) {
-    //   if (s.contains(" "))
-    //   System.out.print(" '" + s + "'");
-    //   else
-    //   System.out.print(" " + s);
-    // }
-    // System.out.println();
-    //
-    // try {
-    //   String line;
-    //   Process p = Runtime.getRuntime().exec(cmd);
-    //
-    //   // Print any output from the assembly process:
-    //   BufferedReader out = new BufferedReader
-    //   (new InputStreamReader(p.getInputStream()));
-    //   BufferedReader err = new BufferedReader
-    //   (new InputStreamReader(p.getErrorStream()));
-    //
-    //   while ((line = out.readLine()) != null) {
-    //     System.out.println(line);
-    //   }
-    //   while ((line = err.readLine()) != null) {
-    //     System.out.println(line);
-    //   }
-    //   out.close();  err.close();
-    //   p.waitFor();
-    //   File sFile = new File(codeFile);
-    //   sFile.delete();
-    // } catch (Exception err) {
-    //   error("Assembly errors detected.");
-    // }
   }
 
   //development logging
